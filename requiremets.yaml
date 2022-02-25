@@ -1,0 +1,8 @@
+name: selenium 
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - numpy
+  - pip
+  - python-chromedriver-binary
