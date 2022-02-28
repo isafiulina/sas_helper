@@ -3,6 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - python
-  - numpy
   - pip
+  - selenium
   - python-chromedriver-binary
