@@ -1,0 +1,12 @@
+name: panosc 
+channels:
+  - conda-forge
+  - ambermd
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - matplotlib
+  - pytraj
+  - ipywidgets
+  - imp

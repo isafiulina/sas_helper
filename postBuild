@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+BIN_DIR="/home/jovyan/.local/bin"
+
+mkdir -p "$BIN_DIR"
+
+TEMP_DIR="$(mktemp -d)"
+pushd "$TEMP_DIR"
+
+# NOLB
+# https://team.inria.fr/nano-d/software/nolb-normal-modes/
+curl -L -o NOLB-linux.zip https://files.inria.fr/NanoDFiles/Website/Software/NOLB/Linux/1.9/NOLB-linux.zip
+unzip NOLB-linux.zip
+mv NOLB "$BIN_DIR"
+
+# Pepsi-SANS
+# https://team.inria.fr/nano-d/software/pepsi-sans/
+curl -L -o Pepsi-SANS-Linux.zip https://files.inria.fr/NanoDFiles/Website/Software/Pepsi-SANS/Linux/3.0/Pepsi-SANS-Linux.zip
+unzip Pepsi-SANS-Linux.zip
+mv Pepsi-SANS "$BIN_DIR"
+
+# Pepsi-SAXS
+# https://team.inria.fr/nano-d/software/pepsi-saxs/
+curl -L -o Pepsi-SAXS-Linux.zip https://files.inria.fr/NanoDFiles/Website/Software/Pepsi-SAXS/Linux/3.0/Pepsi-SAXS-Linux.zip 
+unzip Pepsi-SAXS-Linux.zip
+mv Pepsi-SAXS "$BIN_DIR"
+
+popd
+rm -rf $TEMP_DIR
