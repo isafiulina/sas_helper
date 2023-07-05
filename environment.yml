@@ -1,0 +1,16 @@
+name: environment
+channels:
+  - conda-forge
+dependencies:
+  - python==3.10
+  - ambertools
+  - imp
+  - numpy
+  - matplotlib
+  - pandas
+  - jupyter
+  - nglview
+  - ipywidgets
+  - pip
+  - pip:
+    - pytraj

@@ -29,6 +29,3 @@ mv Pepsi-SAXS "$BIN_DIR"
 
 popd
 rm -rf $TEMP_DIR
-
-# install imp here
-mamba install -c conda-forge -y imp
