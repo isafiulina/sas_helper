@@ -61,7 +61,7 @@ def saxs_profile(pdb_files, core="foxs"):
         for pdb_file in pdb_files:
             if plot_visibility[pdb_file]:
                 if core == "pepsisaxs" or core == "both":
-                    cmd = ["./Pepsi-SAXS ", pdb_file]
+                    cmd = ["Pepsi-SAXS ", pdb_file]
                     output_file = pdb_file.removesuffix(".pdb") + ".out"
                     skip_rows = 6  # Number of rows to skip in Pepsi-SAXS output
                     names = ["q", "int", "Iat", "Iev", "Ihs", "AatAev", "AatAhs", "AevAhs"]
@@ -71,7 +71,7 @@ def saxs_profile(pdb_files, core="foxs"):
                     labels.append(pdb_file + " (Pepsi-SAXS)")
 
                 if core == "foxs" or core == "both":
-                    cmd = ["./setup_environment foxs ", pdb_file]
+                    cmd = ["foxs ", pdb_file]
                     output_file = pdb_file + ".dat"
                     names = ["q", "int", "err"]
                     saxs_output = pd.read_table(output_file, sep="\s+", names=names, comment='#')
@@ -170,7 +170,7 @@ def sans_profile(pdb_files, deut_level=[0], d2o_level=[0],exchange=[0]):
                 for d2o in d2o_level:
                     for exch in exchange:
                         if plot_visibility[pdb_file][deut][d2o][exch]:
-                            cmd = ["./Pepsi-SANS ", pdb_file, "--deut", str(deut), "--d2o", str(d2o),"--exchange", str(exch)]
+                            cmd = ["Pepsi-SANS ", pdb_file, "--deut", str(deut), "--d2o", str(d2o),"--exchange", str(exch)]
                             deut_level_str = str(int(float(deut) * 100))
                             d2o_level_str = str(int(float(d2o) * 100))
                             exch_level_str = str(int(float(exch)*100))
@@ -260,7 +260,7 @@ def sans_profile(pdb_files, deut_level=[0], d2o_level=[0],exchange=[0]):
 def modelpdb_flex(pdb_file, flex_file, num_iter=100, num_modes=100, rad=0.5, models="all"):
     pdb_file_name = os.path.splitext(pdb_file)[0]  # Remove the ".pdb" suffix
 
-    cmd = ["./setup_environment.sh rrt_sample", pdb_file, flex_file]
+    cmd = ["rrt_sample", pdb_file, flex_file]
 
     if num_iter != 100:
         cmd.extend(["-i", str(num_iter)])
@@ -331,7 +331,7 @@ def visualize_result(pdb_file_name, number, models):
 def modelpdb_nolb(pdb_file,num_iter=500,num_modes=10):
     pdb_file_name = os.path.splitext(pdb_file)[0]  # Remove the ".pdb" suffix
 
-    cmd = ["./NOLB ", pdb_file]
+    cmd = ["NOLB ", pdb_file]
 
     if num_iter != 500:
         cmd.extend(["--nSteps", str(num_iter)])
@@ -369,7 +369,7 @@ def fitsaxs(pdb_files, data_file, core="foxs", c1_low=0.99, c1_up=1.05, c2_low=-
         pdb_files = [pdb_files]  # Convert single file to a list
 
     if core=="foxs":
-        cmd = ["./setup_environment.sh foxs"]
+        cmd = ["foxs"]
         cmd.extend(pdb_files)
         cmd.extend([data_file])
 
@@ -581,7 +581,7 @@ def fitsaxs(pdb_files, data_file, core="foxs", c1_low=0.99, c1_up=1.05, c2_low=-
         progress_message = widgets.Label(f"Fitting in progress...")
         display(progress_message)
         for pdb_file in pdb_files:
-            cmd = ["./Pepsi-SAXS", pdb_file, data_file]
+            cmd = ["Pepsi-SAXS", pdb_file, data_file]
             if bg != 0:
                 cmd.extend(["--cstFactor", str(bg)])
             if hyd != False:
@@ -790,7 +790,7 @@ def fitsans(pdb_files, data_file, deut_level=[0], d2o_level=[0], exchange=[0], c
         for deut in deut_level:
             for d2o in d2o_level:
                 for exch in exchange:
-                    cmd = ["./Pepsi-SANS ", pdb_file, data_file, " --deut ", str(deut), " --d2o ", str(d2o)," --exchange ", str(exch)]
+                    cmd = ["Pepsi-SANS ", pdb_file, data_file, " --deut ", str(deut), " --d2o ", str(d2o)," --exchange ", str(exch)]
                     if bg != 0:
                         cmd.extend(["--cstFactor",str(bg)])
                     if hyd != False:
@@ -1023,7 +1023,7 @@ def multimodelfit(pdb_files, data_file, type="saxs", ensemble_size=10, bestK=100
             for deut in deut_level:
                 for d2o in d2o_level:
                     for exch in exchange:
-                        cmd = ["./Pepsi-SANS ", pdb_file, data_file, " --deut ", str(deut), " --d2o ", str(d2o)," --exchange ", str(exch)]
+                        cmd = ["Pepsi-SANS ", pdb_file, data_file, " --deut ", str(deut), " --d2o ", str(d2o)," --exchange ", str(exch)]
                         if bg != 0:
                             cmd.extend(["--cstFactor",str(bg)])
                         if hyd != False:
@@ -1119,7 +1119,7 @@ def multimodelfit(pdb_files, data_file, type="saxs", ensemble_size=10, bestK=100
         clear_output()
         progress_message = widgets.Label(f"Multifit in progress...")
         display(progress_message)
-        cmd = ["./setup_environment.sh multi_foxs", data_file]
+        cmd = ["multi_foxs", data_file]
         if ensemble_size != 10:
             cmd.extend(["-s",str(ensemble_size)])
         if bestK != 1000:
@@ -1158,7 +1158,7 @@ def multimodelfit(pdb_files, data_file, type="saxs", ensemble_size=10, bestK=100
     if type=="saxs":
         progress_message = widgets.Label(f"Multifit in progress...")
         display(progress_message)
-        cmd = ["./setup_environment.sh multi_foxs"]
+        cmd = ["multi_foxs"]
         cmd.extend(pdb_files)
         cmd.extend([data_file])
         if ensemble_size != 10:
