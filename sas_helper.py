@@ -423,7 +423,7 @@ def fitsaxs(pdb_files, data_file, core="foxs", c1_low=0.99, c1_up=1.05, c2_low=-
         sorted_data = sorted(data, key=lambda x: float(x[1]))
         top_10_data = sorted_data[:10] if len(sorted_data) > 10 else sorted_data
         df = pd.DataFrame(top_10_data, columns=['pdb_file', 'Chi^2', 'fit_file'])
-        display(df.style.hide_index())
+        display(df)
 
         # Create plot
         fig, ax = plt.subplots(figsize=(9.5, 6))
@@ -628,7 +628,7 @@ def fitsaxs(pdb_files, data_file, core="foxs", c1_low=0.99, c1_up=1.05, c2_low=-
         sorted_data = sorted(data, key=lambda x: float(x[1]))
         top_10_data = sorted_data[:10] if len(sorted_data) > 10 else sorted_data
         df = pd.DataFrame(top_10_data, columns=['pdb_file', 'Chi^2', 'fit_file'])
-        display(df.style.hide_index())
+        display(df)
 
         # Create plot
         fig, ax = plt.subplots(figsize=(9.5, 6))
@@ -843,7 +843,7 @@ def fitsans(pdb_files, data_file, deut_level=[0], d2o_level=[0], exchange=[0], b
     df.insert(2,'Deut',[float(t[1].split("_d2o")[1].split("_exch")[0])/100 for t in top_10_data])
     df.insert(3,'D2O',[float(t[1].split("_d2o")[1].split("_exch")[0])/100 for t in top_10_data])
     df.insert(4,'H-exchange',[float(t[1].split("_exch")[1].split(".fit")[0])/100 for t in top_10_data])
-    display(df.style.hide_index())
+    display(df)
         # Create plot
     fig, ax = plt.subplots(figsize=(9.5, 6))
     with open(data_file, 'r') as file:
