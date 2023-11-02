@@ -46,7 +46,7 @@ def extract_and_save_models(pdb_file_name, num_modes):
                     model_file.write(header.strip()+'\nMODEL'+model)
                 total_models +=1
     display("Number of calculated conformations: ", total_models)
-        
+
 def show_pdb(pdb_file):
     traj = pt.load(pdb_file)
     view = nv.show_pytraj(traj)
@@ -392,6 +392,7 @@ def modelpdb_nolb(pdb_file,num_iter=500,num_modes=10,blocks=''):
     process.wait()
     time.sleep(1)
     clear_output()
+    extract_and_save_models(pdb_file_name,num_modes)
     files = [f"{pdb_file_name}_nlb_{i}.pdb" for i in range(1, num_modes+1)]
     files.extend([pdb_file])
     interact(show_pdb, pdb_file=files)
