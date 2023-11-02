@@ -32,7 +32,7 @@ def get_created_files(command):
     return created_files
 
 def extract_and_save_models(pdb_file_name, num_modes):
-    total_modes = 0;
+    total_models = 0;
     for i in range(1, num_modes+1):
         with open(f"{pdb_file_name}_nlb_{i}.pdb", 'r') as file:
             file_content = file.read()
@@ -41,11 +41,11 @@ def extract_and_save_models(pdb_file_name, num_modes):
         for j, model in enumerate(models):
             model = model.strip()  # Remove leading/trailing whitespace\n",
             if model:
-                model_filename = f"{pdb_file_name}_nlb_{i}_model_{j}.pdb"
+                model_filename = f"{pdb_file_name}_nlb_{i}_model_{j+1}.pdb"
                 with open(model_filename,'w') as model_file:
-                    model_file.write(header.strip()+'\nMODEL'+model)
+                    model_file.write(header.strip()+model)
                 total_models +=1
-    display("Number of calculated conformations: ", total_models)
+    print("Number of calculated conformations: ", total_models-num_modes)
 
 def show_pdb(pdb_file):
     traj = pt.load(pdb_file)
@@ -159,7 +159,7 @@ def saxs_profile(pdb_files, core="foxs", data_first = ''):
         checkbox_container.children = checkboxes  # Set checkboxes as children of the container
 
     # Create an interactive widget for selecting the scale
-    scale_dropdown = widgets.Dropdown(options=['linear/linear', 'linear/log', 'log/log'], value='linear/linear', description='Scale:')
+    scale_dropdown = widgets.Dropdown(options=['linear/linear', 'linear/log', 'log/log'], value='linear/log', description='Scale:')
     title_input = widgets.Text(value='SAXS Profiles', description='Title:', layout=widgets.Layout(width='300px'))
     # Display the interactive widget
     interact(update_plot, scale=scale_dropdown, plot_title=title_input)
@@ -282,7 +282,7 @@ def sans_profile(pdb_files, deut_level=[0], d2o_level=[0],exchange=[0], data_fir
                     checkbox_container.children = checkboxes  # Set checkboxes as children of the container
 
     # Create an interactive widget for selecting the scale
-    scale_dropdown = widgets.Dropdown(options=['linear/linear', 'linear/log', 'log/log'], value='linear/linear', description='Scale:')
+    scale_dropdown = widgets.Dropdown(options=['linear/linear', 'linear/log', 'log/log'], value='linear/log', description='Scale:')
     title_input = widgets.Text(value='SANS Profiles', description='Title:', layout=widgets.Layout(width='300px'))
     # Display the interactive widget
     interact(update_plot, scale=scale_dropdown, plot_title=title_input)
@@ -370,13 +370,16 @@ def visualize_result(pdb_file_name, number, models):
         files.extend([pdb_file_name])
         interact(show_pdb, pdb_file=files)
 
-def modelpdb_nolb(pdb_file,num_iter=500,num_modes=10,blocks=''):
+def modelpdb_nolb(pdb_file,num_iter=500,num_modes=10,blocks='',num_frames=10):
     pdb_file_name = os.path.splitext(pdb_file)[0]  # Remove the ".pdb" suffix
 
     cmd = ["NOLB ", pdb_file]
 
     if num_iter != 500:
         cmd.extend(["--nSteps", str(num_iter)])
+        
+    if num_frames != 10:
+        cmd.extend(["-s", str(num_frames)])
 
     if num_modes != 10:
         cmd.extend(["-n", str(num_modes)])
@@ -532,7 +535,7 @@ def fitsaxs(pdb_files, data_file, core="foxs", c1_low=0.99, c1_up=1.05, c2_low=-
         # Define scale dropdown and title input
         scale_dropdown = widgets.Dropdown(
             options=['linear/linear', 'linear/log', 'log/log'],
-            value='linear/linear',
+            value='linear/log',
             description='Scale:'
         )
         title_input = widgets.Text(value='Fitting with FoXS', description='Title:', layout=widgets.Layout(width='300px'))
@@ -734,7 +737,7 @@ def fitsaxs(pdb_files, data_file, core="foxs", c1_low=0.99, c1_up=1.05, c2_low=-
         # Define scale dropdown and title input
         scale_dropdown = widgets.Dropdown(
             options=['linear/linear', 'linear/log', 'log/log'],
-            value='linear/linear',
+            value='linear/log',
             description='Scale:'
         )
         title_input = widgets.Text(value='Fitting with Pepsi-SAXS', description='Title:', layout=widgets.Layout(width='300px'))
@@ -947,7 +950,7 @@ def fitsans(pdb_files, data_file, deut_level=[0], d2o_level=[0], exchange=[0], b
     # Define scale dropdown and title input
     scale_dropdown = widgets.Dropdown(
         options=['linear/linear', 'linear/log', 'log/log'],
-        value='linear/linear',
+        value='linear/log',
         description='Scale:',
         layout=widgets.Layout(flex='start')
     )
@@ -1325,7 +1328,7 @@ def multimodelfit(pdb_files, data_file, type="saxs", ensemble_size=10, bestK=100
     # Define scale dropdown and title input
     scale_dropdown = widgets.Dropdown(
         options=['linear/linear', 'linear/log', 'log/log'],
-        value='linear/linear',
+        value='linear/log',
         description='Scale:',
         layout=widgets.Layout(flex='start')
     )
