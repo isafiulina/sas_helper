@@ -31,11 +31,30 @@ def get_created_files(command):
                 created_files.append(file)
     return created_files
 
+def extract_and_save_models(pdb_file_name, num_modes):
+    total_modes = 0;
+    for i in range(1, num_modes+1):
+        with open(f"{pdb_file_name}_nlb_{i}.pdb", 'r') as file:
+            file_content = file.read()
+        models = file_content.split('ENDMDL')
+        header, *model_content = file_content.split('MODEL',1)
+        for j, model in enumerate(models):
+            model = model.strip()  # Remove leading/trailing whitespace\n",
+            if model:
+                model_filename = f"{pdb_file_name}_nlb_{i}_model_{j}.pdb"
+                with open(model_filename,'w') as model_file:
+                    model_file.write(header.strip()+'\nMODEL'+model)
+                total_models +=1
+    display("Number of calculated conformations: ", total_models)
+        
 def show_pdb(pdb_file):
     traj = pt.load(pdb_file)
     view = nv.show_pytraj(traj)
     view._remote_call("setSize", target="Widget", args=["800px", "800px"])
     display(view)
+
+def show_pdbs(pdb_files):
+    interact(show_pdb,pdb_file=pdb_files)
 
 def download_pdb(link,filename):
     urllib.request.urlretrieve(link, filename)
@@ -44,7 +63,7 @@ def download_pdb(link,filename):
 def download_sasdata(link,filename):
     return
 
-def saxs_profile(pdb_files, core="foxs"):
+def saxs_profile(pdb_files, core="foxs", data_first = ''):
     if isinstance(pdb_files, str):
         pdb_files = [pdb_files]  # Convert single file to a list
 
@@ -88,6 +107,11 @@ def saxs_profile(pdb_files, core="foxs"):
                     line, = ax.plot(saxs_output.q, saxs_output.int, linewidth=2)
                     handles.append(line)
                     labels.append(pdb_file + " (FoXS)")
+        if data_first:
+            first = pd.read_table(data_first,sep="\s+",skiprows=1,comment='#',names=["q","int","err"])
+            line = ax.errorbar(first.q, first.int/(first.int[0]/saxs_output.int[0]), yerr=first.err, fmt='o', zorder=-1, c='k')
+            handles.append(line)
+            labels.append(f"{data_first}")
 
         ax.set_title(plot_title)
         ax.set_yscale(scale_y)
@@ -151,7 +175,7 @@ def saxs_profile(pdb_files, core="foxs"):
             toolbar.toolitems.remove(toolitem)
             break
 
-def sans_profile(pdb_files, deut_level=[0], d2o_level=[0],exchange=[0]):
+def sans_profile(pdb_files, deut_level=[0], d2o_level=[0],exchange=[0], data_first = ''):
     if isinstance(pdb_files, str):
         pdb_files = [pdb_files]  # Convert single file to a list
 
@@ -175,6 +199,7 @@ def sans_profile(pdb_files, deut_level=[0], d2o_level=[0],exchange=[0]):
         handles = []  # Store handles for legend
         labels = []  # Store labels for legend
 
+
         for pdb_file in pdb_files:
             for deut in deut_level:
                 for d2o in d2o_level:
@@ -193,6 +218,12 @@ def sans_profile(pdb_files, deut_level=[0], d2o_level=[0],exchange=[0]):
                             line, = ax.plot(pepsisans_output.q, pepsisans_output.int, linewidth=4)
                             handles.append(line)
                             labels.append(f"{pdb_file} (Deut: {deut}, D2O: {d2o}, Exchange: {exch})")
+
+        if data_first:
+            first = pd.read_table(data_first,sep="\s+",skiprows=1,names=["q","int","err"])
+            line = ax.errorbar(first.q, first.int/(first.int[0]/pepsisans_output.int[0]), yerr=first.err, fmt='o', zorder=-1, c='k')
+            handles.append(line)
+            labels.append(f"{data_first}")
 
         ax.set_title(plot_title)
         ax.set_yscale(scale_y)
@@ -339,7 +370,7 @@ def visualize_result(pdb_file_name, number, models):
         files.extend([pdb_file_name])
         interact(show_pdb, pdb_file=files)
 
-def modelpdb_nolb(pdb_file,num_iter=500,num_modes=10):
+def modelpdb_nolb(pdb_file,num_iter=500,num_modes=10,blocks=''):
     pdb_file_name = os.path.splitext(pdb_file)[0]  # Remove the ".pdb" suffix
 
     cmd = ["NOLB ", pdb_file]
@@ -350,26 +381,17 @@ def modelpdb_nolb(pdb_file,num_iter=500,num_modes=10):
     if num_modes != 10:
         cmd.extend(["-n", str(num_modes)])
 
+    if blocks:
+        cmd.extend(["--blocks", str(blocks)])
+
     cmd = " ".join(cmd)
     cmd = f"{cmd} > {pdb_file_name}_nolb_output.txt 2>&1"  # Run the command with output redirection
-
-    # Display progress message
     progress_message = widgets.Label("Modeling in progress...")
-
     display(progress_message)
-
-    # Run the modeling command
     process = subprocess.Popen(cmd, shell=True)
-
-    # Wait for the modeling process to finish and capture the output
     process.wait()
-
-    # Wait for a short period to ensure the file is written completely
     time.sleep(1)
-
-    # Remove the progress message
     clear_output()
-
     files = [f"{pdb_file_name}_nlb_{i}.pdb" for i in range(1, num_modes+1)]
     files.extend([pdb_file])
     interact(show_pdb, pdb_file=files)
@@ -1035,8 +1057,8 @@ def multimodelfit(pdb_files, data_file, type="saxs", ensemble_size=10, bestK=100
                 for d2o in d2o_level:
                     for exch in exchange:
                         cmd = ["Pepsi-SANS ", pdb_file, data_file, " --deut ", str(deut), " --d2o ", str(d2o)," --exchange ", str(exch)]
-                        if bg != 0:
-                            cmd.extend(["--cstFactor",str(bg)])
+                        #if bg != 0:
+                        #    cmd.extend(["--cstFactor",str(bg)])
                         if hyd != False:
                             cmd.extend(["-hyd"])
                         if scale != 1:
